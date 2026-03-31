@@ -24,24 +24,10 @@ jobs:
           cache: 'pip'
           cache-dependency-path: '${{ env.REPO_DIR }}/requirements.txt'
 
-      - name: Get upstream data hash
-        id: upstream
-        run: |
-          curl --fail -sL "https://raw.githubusercontent.com/dandi-cache/content-id-to-dandiset-paths/refs/heads/min/derivatives/content_id_to_dandiset_paths.min.json.gz" -o /tmp/upstream_data.json.gz
-          echo "hash=$(md5sum /tmp/upstream_data.json.gz | cut -d' ' -f1)" >> $GITHUB_OUTPUT
-
-      - name: Cache derivatives
-        id: cache-derivatives
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.REPO_DIR }}/derivatives
-          key: derivatives-${{ steps.upstream.outputs.hash }}
-
       - name: Install dependencies
         run: pip install -r $REPO_DIR/requirements.txt
 
       - name: Run update
-        if: steps.cache-derivatives.outputs.cache-hit != 'true'
         run: python $REPO_DIR/code/update.py
 
       - name: Upload YAML
